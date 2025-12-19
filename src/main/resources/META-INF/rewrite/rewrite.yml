@@ -1,32 +1,48 @@
-#
-# Copyright 2021 the original author or authors.
-# <p>
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# <p>
-# https://www.apache.org/licenses/LICENSE-2.0
-# <p>
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-# Include any Declarative YAML format recipes here, as per:
-# https://docs.openrewrite.org/reference/yaml-format-reference
-# These are most easily composed through the Yaml recipe builder at:
-# https://app.moderne.io/recipes/builder
-
-# Notice how we can have multiple recipes in the same file, separated by `---`
-# You can also have multiple files in `src/main/resources/META-INF/rewrite`, each containing one or more recipes.
----
 type: specs.openrewrite.org/v1beta/recipe
-name: com.yourorg.UseOpenRewriteNullable
-displayName: Prefer OpenRewrite Nullable
-description: Replaces JetBrains Nullable with OpenRewrite Nullable.
+name: org.openrewrite.recipe.querydsl.UpgradeToQueryDsl5
+displayName: UpgrateToQueryDSL_5
+description: ""
 recipeList:
+  - org.openrewrite.java.migrate.jakarta.JakartaEE11
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: com.mysema.querydsl
+      oldArtifactId: querydsl-jpa
+      newGroupId: com.querydsl
+      newArtifactId: querydsl-jpa
+      newVersion: ${querydsl.version}
+      overrideManagedVersion: true
+  - org.openrewrite.maven.ChangeDependencyClassifier:
+      groupId: com.querydsl
+      artifactId: querydsl-jpa
+      newClassifier: jakarta
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: com.mysema.querydsl
+      oldArtifactId: querydsl-apt
+      newGroupId: com.querydsl
+      newArtifactId: querydsl-apt
+      newVersion: ${querydsl.version}
+      overrideManagedVersion: true
+  - org.openrewrite.maven.ChangeDependencyClassifier:
+      groupId: com.querydsl
+      artifactId: querydsl-apt
+      newClassifier: jakarta
+  - org.openrewrite.maven.AddPluginDependency:
+      pluginGroupId: com.mysema.maven
+      pluginArtifactId: apt-maven-plugin
+      groupId: com.querydsl
+      artifactId: querydsl-apt
+      version: ${querydsl.version}
+  - org.openrewrite.xml.ChangeTagValue:
+      elementName: //plugin[artifactId='apt-maven-plugin']/executions/execution/configuration/processor[text()='com.mysema.query.apt.jpa.JPAAnnotationProcessor']
+      newValue: com.querydsl.apt.jpa.JPAAnnotationProcessor
   - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: org.jetbrains.annotations.Nullable
-      newFullyQualifiedTypeName: org.openrewrite.internal.lang.Nullable
+      oldFullyQualifiedTypeName: com.mysema.query.jpa.impl.JPAQuery
+      newFullyQualifiedTypeName: com.querydsl.jpa.impl.JPAQueryFactory
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: com.querydsl.jpa.impl.JPAQueryFactory from(..)
+      newMethodName: selectFrom
+      ignoreDefinition: true
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: com.querydsl.jpa.impl.JPAQuery list(..)
+      newMethodName: fetch
+      ignoreDefinition: true
