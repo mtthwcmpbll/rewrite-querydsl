@@ -49,11 +49,3 @@ recipeList:
       oldFullyQualifiedTypeName: com.mysema.query.jpa.impl.JPAQuery
       newFullyQualifiedTypeName: com.querydsl.jpa.impl.JPAQueryFactory
       ignoreDefinition: true
----
-type: specs.openrewrite.org/v1beta/recipe
-name: org.openrewrite.recipe.querydsl.CustomUpgradeSpringBoot_4_0
-displayName: CustomUpgradeSpringBoot_4_0
-description: ""
-recipeList:
-  - org.openrewrite.recipe.querydsl.UpgradeToQueryDsl5
-  - io.moderne.java.spring.boot4.UpgradeSpringBoot_4_0
